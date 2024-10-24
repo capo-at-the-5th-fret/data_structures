@@ -317,7 +317,9 @@ namespace caff
             return *this;
         }
 
-        friend bool operator==(const binary_tree& lhs, const binary_tree& rhs);
+        template <typename T>
+        friend bool operator==(const binary_tree<T>& lhs,
+            const binary_tree<T>& rhs);
 
         auto begin()
         {
@@ -399,7 +401,28 @@ namespace caff
         }
 
     private:
-        void insert_node(node* current, const T& value)
+        static bool compare_trees(node* lhs, node* rhs)
+        {
+            if (lhs == nullptr && rhs == nullptr)
+            {
+                return true;
+            }
+
+            if (lhs == nullptr || rhs == nullptr)
+            {
+                return false;
+            }
+
+            if (lhs->value != rhs->value)
+            {
+                return false;
+            }
+
+            return compare_trees(lhs->left, rhs->left) &&
+                compare_trees(lhs->right, rhs->right);
+        }
+
+        static void insert_node(node* current, const T& value)
         {
             if (value < current->value)
             {
@@ -425,7 +448,7 @@ namespace caff
             }
         }
 
-        node* copy_nodes(node* current)
+        static node* copy_nodes(node* current)
         {
             if (current == nullptr)
             {
@@ -438,7 +461,7 @@ namespace caff
             return new_node;
         }
 
-        void clear_nodes(node* current)
+        static void clear_nodes(node* current)
         {
             if (current != nullptr)
             {
@@ -448,7 +471,7 @@ namespace caff
             }
         }
 
-        std::size_t calculate_height(node* current) const
+        static std::size_t calculate_height(node* current)
         {
             if (current == nullptr)
             {
@@ -463,13 +486,13 @@ namespace caff
         std::size_t size_{ 0 };
     };
 
-    template <typename T>
+    export template <typename T>
     bool operator==(const binary_tree<T>& lhs, const binary_tree<T>& rhs)
     {
         if (lhs.size_ != rhs.size_)
         {
             return false;
         }
-        return compare_trees(lhs.root_, rhs.root_);
+        return binary_tree<T>::compare_trees(lhs.root_, rhs.root_);
     }
 }

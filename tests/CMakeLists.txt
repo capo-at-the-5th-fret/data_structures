@@ -28,6 +28,7 @@ add_executable(testrunner
 
     main.cpp
 
+    binary_tree_tests.cpp
     doubly_linked_list_tests.cpp
     inplace_vector_tests.cpp
     linked_list_tests.cpp
