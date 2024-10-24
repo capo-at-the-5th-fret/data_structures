@@ -271,7 +271,8 @@ namespace caff
         using const_pointer = const value_type*;
         using iterator = in_order_iterator<T>;
         //using const_iterator = in_order_iterator<binary_tree_node<T>>;
-        using reverse_iterator = std::reverse_iterator<iterator>;
+        //using reverse_iterator = std::reverse_iterator<iterator>;
+        //using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
         using node = binary_tree_node<T>;
 
