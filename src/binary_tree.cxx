@@ -253,6 +253,11 @@ namespace caff
         std::queue<node*> queue_;
     };
 
+    static_assert(std::forward_iterator<in_order_iterator<int>>);
+    static_assert(std::forward_iterator<pre_order_iterator<int>>);
+    static_assert(std::forward_iterator<post_order_iterator<int>>);
+    static_assert(std::forward_iterator<level_order_iterator<int>>);
+
     export template<typename T>
     class binary_tree
     {
