@@ -400,7 +400,7 @@ namespace caff
         {
             if (value < current->value)
             {
-                if (!current->left)
+                if (current->left == nullptr)
                 {
                     current->left = new node{ value };
                 }
@@ -411,7 +411,7 @@ namespace caff
             }
             else
             {
-                if (!current->right)
+                if (current->right == nullptr)
                 {
                     current->right = new node{ value };
                 }
@@ -424,7 +424,7 @@ namespace caff
 
         node* copy_nodes(node* current)
         {
-            if (!current)
+            if (current == nullptr)
             {
                 return nullptr;
             }
@@ -437,7 +437,7 @@ namespace caff
 
         void clear_nodes(node* current)
         {
-            if (current)
+            if (current != nullptr)
             {
                 clear_nodes(current->left);
                 clear_nodes(current->right);
@@ -447,12 +447,12 @@ namespace caff
 
         std::size_t calculate_height(node* current) const
         {
-            if (!current)
+            if (current == nullptr)
             {
                 return 0;
             }
-            std::size_t left_height = calculate_height(current->left);
-            std::size_t right_height = calculate_height(current->right);
+            auto left_height = calculate_height(current->left);
+            auto right_height = calculate_height(current->right);
             return std::max(left_height, right_height) + 1;
         }
 
