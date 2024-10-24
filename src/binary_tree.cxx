@@ -357,6 +357,8 @@ namespace caff
         void clear()
         {
             clear_nodes(root_);
+            root_ = nullptr;
+            size_ = 0;
         }
 
         void insert(const T& value)
