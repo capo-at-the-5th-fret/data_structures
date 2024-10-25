@@ -25,7 +25,7 @@ namespace caff
 
         explicit in_order_iterator(node* n = nullptr)
         {
-            push_left_most(n);
+            push_leftmost(n);
         }
 
         reference operator*() const
@@ -42,10 +42,12 @@ namespace caff
         {
             node* current = stack_.top();
             stack_.pop();
+
             if (current->right != nullptr)
             {
                 push_leftmost(current->right);
             }
+
             return *this;
         }
 
@@ -56,7 +58,7 @@ namespace caff
             return tmp;
         }
 
-        bool operator==(const in_order_iterator&) const = default;
+        bool operator==(const in_order_iterator& rhs) const = default;
 
     private:
         void push_leftmost(node* n)
@@ -78,15 +80,15 @@ namespace caff
         using iterator_category = std::forward_iterator_tag;
         using value_type = T;
         using difference_type = std::ptrdiff_t;
-        using pointer = const T*;
-        using reference = const T&;
-        using node = binary_tree_node<T>;
+        using pointer = const value_type*;
+        using reference = const value_type&;
+        using node = binary_tree_node<value_type>;
 
-        explicit pre_order_iterator(node* root = nullptr)
+        explicit pre_order_iterator(node* n = nullptr)
         {
-            if (root)
+            if (n != nullptr)
             {
-                stack_.push(root);
+                stack_.push(n);
             }
         }
 
@@ -97,32 +99,35 @@ namespace caff
 
         pointer operator->() const
         {
-            return &stack_.top()->value;
+            return std::addressof(stack_.top()->value);
         }
 
         pre_order_iterator& operator++()
         {
             node* current = stack_.top();
             stack_.pop();
-            if (current->right)
+
+            if (current->right != nullptr)
             {
                 stack_.push(current->right);
             }
-            if (current->left)
+
+            if (current->left != nullptr)
             {
                 stack_.push(current->left);
             }
+
             return *this;
         }
 
         pre_order_iterator operator++(int)
         {
-            pre_order_iterator temp = *this;
+            pre_order_iterator tmp = *this;
             ++(*this);
-            return temp;
+            return tmp;
         }
 
-        bool operator==(const pre_order_iterator&) const = default;
+        bool operator==(const pre_order_iterator& rhs) const = default;
 
     private:
         std::stack<node*> stack_;
@@ -135,13 +140,13 @@ namespace caff
         using iterator_category = std::forward_iterator_tag;
         using value_type = T;
         using difference_type = std::ptrdiff_t;
-        using pointer = const T*;
-        using reference = const T&;
-        using node = binary_tree_node<T>;
+        using pointer = value_type*;
+        using reference = value_type&;
+        using node = binary_tree_node<value_type>;
 
-        explicit post_order_iterator(node* root = nullptr)
+        explicit post_order_iterator(node* n = nullptr)
         {
-            push_leftmost(root);
+            push_leftmost(n);
         }
 
         reference operator*() const
@@ -151,7 +156,7 @@ namespace caff
 
         pointer operator->() const
         {
-            return &stack_.top()->value;
+            return std::addressof(stack_.top()->value);
         }
 
         post_order_iterator& operator++()
@@ -159,7 +164,7 @@ namespace caff
             node* current = stack_.top();
             stack_.pop();
 
-            if (!stack_.empty() && stack_.top()->left == current)
+            if (!stack_.empty() && (stack_.top()->left == current))
             {
                 push_leftmost(stack_.top()->right);
             }
@@ -169,31 +174,32 @@ namespace caff
 
         post_order_iterator operator++(int)
         {
-            post_order_iterator temp = *this;
+            post_order_iterator tmp = *this;
             ++(*this);
-            return temp;
+            return tmp;
         }
 
-        bool operator==(const post_order_iterator&) const = default;
+        bool operator==(const post_order_iterator& rhs) const = default;
 
     private:
-        std::stack<node*> stack_;
-
-        void push_leftmost(node* root)
+        void push_leftmost(node* n)
         {
-            while (root)
+            while (n != nullptr)
             {
-                stack_.push(root);
-                if (root->left)
+                stack_.push(n);
+
+                if (n->left != nullptr)
                 {
-                    root = root->left;
+                    n = n->left;
                 }
                 else
                 {
-                    root = root->right;
+                    n = n->right;
                 }
             }
         }
+
+        std::stack<node*> stack_;
     };
 
     export template <typename T>
@@ -203,15 +209,15 @@ namespace caff
         using iterator_category = std::forward_iterator_tag;
         using value_type = T;
         using difference_type = std::ptrdiff_t;
-        using pointer = const T*;
-        using reference = const T&;
-        using node = binary_tree_node<T>;
+        using pointer = value_type*;
+        using reference = value_type&;
+        using node = binary_tree_node<value_type>;
 
-        explicit level_order_iterator(node* root = nullptr)
+        explicit level_order_iterator(node* n = nullptr)
         {
-            if (root)
+            if (n != nullptr)
             {
-                queue_.push(root);
+                queue_.push(n);
             }
         }
 
@@ -222,32 +228,35 @@ namespace caff
 
         pointer operator->() const
         {
-            return &queue_.front()->value;
+            return std::addressof(queue_.front()->value);
         }
 
         level_order_iterator& operator++()
         {
             node* current = queue_.front();
             queue_.pop();
-            if (current->left)
+
+            if (current->left != nullptr)
             {
                 queue_.push(current->left);
             }
-            if (current->right)
+
+            if (current->right != nullptr)
             {
                 queue_.push(current->right);
             }
+
             return *this;
         }
 
         level_order_iterator operator++(int)
         {
-            level_order_iterator temp = *this;
+            level_order_iterator tmp = *this;
             ++(*this);
-            return temp;
+            return tmp;
         }
 
-        bool operator==(const level_order_iterator&) const = default;
+        bool operator==(const level_order_iterator& rhs) const = default;
 
     private:
         std::queue<node*> queue_;
@@ -317,9 +326,14 @@ namespace caff
             return *this;
         }
 
-        template <typename T>
-        friend bool operator==(const binary_tree<T>& lhs,
-            const binary_tree<T>& rhs);
+        friend bool operator==(const binary_tree& lhs, const binary_tree& rhs)
+        {
+            if (lhs.size_ != rhs.size_)
+            {
+                return false;
+            }
+            return compare_trees(lhs.root_, rhs.root_);
+        }
 
         auto begin()
         {
@@ -485,14 +499,4 @@ namespace caff
         node* root_{ nullptr };
         std::size_t size_{ 0 };
     };
-
-    export template <typename T>
-    bool operator==(const binary_tree<T>& lhs, const binary_tree<T>& rhs)
-    {
-        if (lhs.size_ != rhs.size_)
-        {
-            return false;
-        }
-        return binary_tree<T>::compare_trees(lhs.root_, rhs.root_);
-    }
 }
