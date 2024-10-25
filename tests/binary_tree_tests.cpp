@@ -5,6 +5,20 @@ TEST_CASE("binary_tree")
 {
     using namespace caff;
 
+    SUBCASE("member types")
+    {
+        using test_type = binary_tree<int>;
+
+        static_assert(std::is_same_v<test_type::value_type, int>);
+        static_assert(std::is_same_v<test_type::size_type, std::size_t>);
+        static_assert(std::is_same_v<test_type::difference_type, std::ptrdiff_t>);
+        static_assert(std::is_same_v<test_type::referernce, int&>);
+        static_assert(std::is_same_v<test_type::const_reference, const int&>);
+        static_assert(std::is_same_v<test_type::pointer, int*>);
+        static_assert(std::is_same_v<test_type::const_pointer, const int*>);
+        static_assert(std::is_same_v<test_type::iterator, in_order_iterator<int>>);
+    }
+
     SUBCASE("default constructor")
     {
         binary_tree<int> tree;

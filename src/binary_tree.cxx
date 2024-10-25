@@ -4,7 +4,7 @@ import std;
 
 namespace caff
 {
-    template <typename T>
+    export template <typename T>
     struct binary_tree_node
     {
         T value{};
@@ -12,7 +12,7 @@ namespace caff
         binary_tree_node* right{ nullptr };
     };
 
-    template <typename T>
+    export template <typename T>
     class in_order_iterator
     {
     public:
@@ -71,7 +71,7 @@ namespace caff
         std::stack<node*> stack_;
     };
 
-    template <typename T>
+    export template <typename T>
     class pre_order_iterator
     {
     public:
@@ -128,7 +128,7 @@ namespace caff
         std::stack<node*> stack_;
     };
 
-    template <typename T>
+    export template <typename T>
     class post_order_iterator
     {
     public:
@@ -196,7 +196,7 @@ namespace caff
         }
     };
 
-    template <typename T>
+    export template <typename T>
     class level_order_iterator
     {
     public:
