@@ -1,6 +1,20 @@
 #include <doctest/doctest.h>
 import data_structures;
 
+TEST_CASE("binary_tree_node")
+{
+    using namespace caff;
+
+    SUBCASE("default constructor")
+    {
+        binary_tree_node<int> n;
+
+        REQUIRE(n.value == 0);
+        REQUIRE(n.left == nullptr);
+        REQUIRE(n.right == nullptr);
+    }
+}
+
 TEST_CASE("binary_tree")
 {
     using namespace caff;
