@@ -17,15 +17,15 @@ namespace caff
     {
     public:
         using iterator_category = std::forward_iterator_tag;
-        using value_type = T;
         using difference_type = std::ptrdiff_t;
-        using pointer = const T*;
-        using reference = const T&;
-        using node = binary_tree_node<T>;
+        using value_type = T;
+        using pointer = const value_type*;
+        using reference = const value_type&;
+        using node = binary_tree_node<value_type>;
 
-        explicit in_order_iterator(node* root = nullptr)
+        explicit in_order_iterator(node* n = nullptr)
         {
-            push_leftmost(root);
+            push_left_most(n);
         }
 
         reference operator*() const
@@ -35,14 +35,14 @@ namespace caff
 
         pointer operator->() const
         {
-            return &stack_.top()->value;
+            return std::addressof(stack_.top()->value);
         }
 
         in_order_iterator& operator++()
         {
             node* current = stack_.top();
             stack_.pop();
-            if (current->right)
+            if (current->right != nullptr)
             {
                 push_leftmost(current->right);
             }
@@ -51,20 +51,20 @@ namespace caff
 
         in_order_iterator operator++(int)
         {
-            in_order_iterator temp = *this;
+            in_order_iterator tmp = *this;
             ++(*this);
-            return temp;
+            return tmp;
         }
 
         bool operator==(const in_order_iterator&) const = default;
 
     private:
-        void push_leftmost(node* root)
+        void push_leftmost(node* n)
         {
-            while (root)
+            while (n != nullptr)
             {
-                stack_.push(root);
-                root = root->left;
+                stack_.push(n);
+                n = n->left;
             }
         }
 
