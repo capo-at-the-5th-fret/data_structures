@@ -57,7 +57,7 @@ TEST_CASE("binary_tree")
         REQUIRE(values[6] == 7);
     }
 
-    SUBCASE("copy structure")
+    SUBCASE("copy constructor")
     {   
         const binary_tree other{ 4, 2, 6, 1, 3, 5, 7 };
         const binary_tree tree{ other };

@@ -297,7 +297,7 @@ namespace caff
 
         binary_tree(const binary_tree& other) : size_{ other.size_ }
         {
-            if (other.root_)
+            if (other.root_ != nullptr)
             {
                 root_ = copy_nodes(other.root_);
             }
@@ -310,11 +310,12 @@ namespace caff
 
         binary_tree& operator=(const binary_tree& other)
         {
-            if (this != &other)
+            if (this != std::addressof(other))
             {
                 clear_nodes(root_);
                 size_ = other.size_;
-                if (other.root_)
+
+                if (other.root_ != nullptr)
                 {
                     root_ = copy_nodes(other.root_);
                 }
@@ -323,6 +324,7 @@ namespace caff
                     root_ = nullptr;
                 }
             }
+
             return *this;
         }
 
