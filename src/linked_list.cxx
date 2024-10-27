@@ -4,16 +4,156 @@ import std;
 
 namespace caff
 {
+    export template <typename T>
+    struct linked_list_node
+    {
+        T value{ 0 };
+        linked_list_node* next{ nullptr };
+    };
+
+    export template <typename T>
+    struct linked_list_iterator
+    {
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = T;
+        using pointer = value_type*;
+        using reference = value_type&;
+
+        using node_pointer = linked_list_node<value_type>*;
+
+        linked_list_iterator() = default;
+
+        explicit linked_list_iterator(node_pointer n) : node_{ n }
+        {
+        }
+
+        friend bool operator==(const linked_list_iterator& lhs,
+            const linked_list_iterator& rhs) = default;
+
+        reference operator*() const
+        {
+            return node_->value;
+        }
+
+        pointer operator->() const
+        {
+            return std::addressof(node_->value);
+        }
+
+        linked_list_iterator& operator++()
+        {
+            if (node_ != nullptr)
+            {
+                node_ = node_->next;
+            }
+            return *this;
+        }
+
+        linked_list_iterator operator++(int)
+        {
+            linked_list_iterator tmp{ *this };
+            ++*this;
+            return tmp;
+        }
+
+        node_pointer node() const
+        {
+            return node_;
+        }
+
+    private:
+        node_pointer node_{ nullptr };
+    };
+
+    export template <typename T>
+    struct linked_list_const_iterator
+    {
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = T;
+        using pointer = const value_type*;
+        using reference = const value_type&;
+
+        using node_pointer = const linked_list_node<value_type>*;
+
+        linked_list_const_iterator() = default;
+
+        explicit linked_list_const_iterator(node_pointer n) : node_{ n }
+        {
+        }
+
+        linked_list_const_iterator(const linked_list_iterator<value_type>& pos)
+            : node_{ pos.node() }
+        {
+        }
+
+        friend bool operator==(const linked_list_const_iterator& lhs,
+            const linked_list_const_iterator& rhs) = default;
+
+        reference operator*() const
+        {
+            return node_->value;
+        }
+
+        pointer operator->() const
+        {
+            return std::addressof(node_->value);
+        }
+
+        linked_list_const_iterator& operator++()
+        {
+            if (node_ != nullptr)
+            {
+                node_ = node_->next;
+            }
+            return *this;
+        }
+
+        linked_list_const_iterator operator++(int)
+        {
+            linked_list_const_iterator tmp{ *this };
+            ++*this;
+            return tmp;
+        }
+
+        node_pointer node() const
+        {
+            return node_;
+        }
+
+    private:
+        node_pointer node_{ nullptr };
+    };
+
+    static_assert(std::forward_iterator<linked_list_iterator<int>>);
+    static_assert(std::forward_iterator<linked_list_const_iterator<int>>);
+
     // NOTE: This is not as efficient as std::forward_list, which uses
     // functions like before_begin() and insert_after() to help insert
     // elements without having to traverse nodes to find the insertion
     // point.
-    export class linked_list
+    export template <typename T>
+    class linked_list
     {
     public:
+        using value_type = T;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using iterator = linked_list_iterator<value_type>;
+        using const_iterator = linked_list_const_iterator<value_type>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+        using node = linked_list_node<value_type>;
+
         linked_list() = default;
 
-        linked_list(std::initializer_list<int> values)
+        linked_list(std::initializer_list<T> values)
         {
             insert(end(), values.begin(), values.end());
         }
@@ -30,7 +170,7 @@ namespace caff
     
         linked_list& operator=(const linked_list& other)
         {
-            if (this != &other)
+            if (this != std::addressof(other))
             {
                 clear();
                 insert(end(), other.begin(), other.end());
@@ -39,135 +179,26 @@ namespace caff
             return *this;
         }
 
-        linked_list& operator=(std::initializer_list<int> values)
+        linked_list& operator=(std::initializer_list<T> values)
         {
             clear();
             insert(end(), values.begin(), values.end());
             return *this;
         }
 
-        class list_node;
-
-        class iterator
+        reference front()
         {
-        public:
-            using iterator_category = std::forward_iterator_tag;
-            using value_type = int;
-            using difference_type = std::ptrdiff_t;
-            using pointer = int*;
-            using reference = int&;
+            return head_->value;
+        }
 
-            using node_pointer = list_node*;
-
-            iterator() = default;
-
-            iterator(node_pointer n) : node_{ n }
-            {
-            }
-
-            bool operator==(const iterator& other) const = default;
-
-            reference operator*() const
-            {
-                return node_->value;
-            }
-
-            pointer operator->() const
-            {
-                return std::addressof(node_->value);
-            }
-
-            iterator& operator++()
-            {
-                if (node_ != nullptr)
-                {
-                    node_ = node_->next;
-                }
-                return *this;
-            }
-
-            iterator operator++(int)
-            {
-                iterator temp{ *this };
-                ++(*this);
-                return temp;
-            }
-
-            node_pointer node() const
-            {
-                return node_;
-            }
-
-        private:
-            node_pointer node_{ nullptr };
-        };
-
-        class const_iterator
+        const_reference front() const
         {
-        public:
-            using iterator_category = std::forward_iterator_tag;
-            using value_type = const int;
-            using difference_type = std::ptrdiff_t;
-            using pointer = const int*;
-            using reference = const int&;
-
-            using node_pointer = const list_node*;
-
-            const_iterator() = default;
-
-            const_iterator(node_pointer n) : node_{ n }
-            {
-            }
-
-            const_iterator(const iterator& pos) : node_{ pos.node() }
-            {
-            }
-
-            bool operator==(const const_iterator& other) const = default;
-
-            reference operator*() const
-            {
-                return node_->value;
-            }
-
-            pointer operator->() const
-            {
-                return std::addressof(node_->value);
-            }
-
-            const_iterator& operator++()
-            {
-                if (node_ != nullptr)
-                {
-                    node_ = node_->next;
-                }
-                return *this;
-            }
-
-            const_iterator operator++(int)
-            {
-                const_iterator temp{ *this };
-                ++(*this);
-                return temp;
-            }
-
-            node_pointer node() const
-            {
-                return node_;
-            }
-
-        private:
-            node_pointer node_{ nullptr };
-        };
+            return head_->value;
+        }
 
         iterator begin()
         {
             return iterator{ head_ };
-        }
-
-        iterator end()
-        {
-            return iterator{ nullptr };
         }
 
         const_iterator begin() const
@@ -175,7 +206,22 @@ namespace caff
             return const_iterator{ head_ };
         }
 
+        const_iterator cbegin() const
+        {
+            return const_iterator{ head_ };
+        }
+
+        iterator end()
+        {
+            return iterator{ nullptr };
+        }
+
         const_iterator end() const
+        {
+            return const_iterator{ nullptr };
+        }
+
+        const_iterator cend() const
         {
             return const_iterator{ nullptr };
         }
@@ -195,18 +241,18 @@ namespace caff
             auto* node = head_;
             head_ = nullptr;
             size_ = 0;
-
+            
             while (node != nullptr)
             {
-                auto* temp = node;
+                auto* tmp = node;
                 node = node->next;
-                delete temp;
+                delete tmp;
             }
         }
 
-        iterator insert(const_iterator pos, int value)
+        iterator insert(const_iterator pos, const T& value)
         {
-            auto* new_node = new list_node
+            auto* new_node = new node
             {
                 .value = value,
                 .next = nullptr
@@ -242,7 +288,7 @@ namespace caff
         }
 
         template <std::input_iterator InputIt>
-        requires (std::same_as<std::iter_value_t<InputIt>, int>)
+        requires (std::same_as<std::iter_value_t<InputIt>, T>)
         iterator insert(const_iterator pos, InputIt first, InputIt last)
         {
             if (first == last)
@@ -262,13 +308,13 @@ namespace caff
             }
 
             // construct the new nodes, keeping track of the first, last and count
-            auto* first_node = new list_node{ .value = *first, .next = nullptr };
+            auto* first_node = new node{ .value = *first, .next = nullptr };
             auto* last_node = first_node;
             std::size_t new_node_count{ 1 };
             
             for (auto pos = std::next(first); pos != last; ++pos)
             {
-                auto* new_node = new list_node{ .value = *pos, .next = nullptr };
+                auto* new_node = new node{ .value = *pos, .next = nullptr };
                 last_node->next = new_node;
                 last_node = new_node;
                 ++new_node_count;
@@ -335,69 +381,31 @@ namespace caff
             return end();
         }
 
-        void push_back(int value)
-        {
-            insert(end(), value);
-        }
-
-        void push_front(int value)
+        void push_front(const T& value)
         {
             insert(begin(), value);
         }
 
-    private:
-        struct list_node
+        void pop_front()
         {
-            int value{ 0 };
-            list_node* next{ nullptr };
-        };
-
-        list_node* head_{ nullptr };
-        std::size_t size_{ 0 };
-    };
-
-    export bool operator==(const linked_list& lhs, const linked_list& rhs)
-    {
-        return std::ranges::equal(lhs, rhs);
-    }
-
-    export auto operator<=>(const linked_list& lhs, const linked_list& rhs)
-    {
-        return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(),
-            rhs.begin(), rhs.end());
-    }
-}
-
-static_assert(std::forward_iterator<caff::linked_list::iterator>);
-static_assert(std::forward_iterator<caff::linked_list::const_iterator>);
-
-export template <>
-struct std::formatter<caff::linked_list>
-{
-    template <typename ParseContext>
-    constexpr auto parse(ParseContext& ctx)
-    {
-        return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(const caff::linked_list& list, FormatContext& ctx) const
-    {
-        // TODO: Use range formatter?
-        auto out = ctx.out();
-        out = std::format_to(out, "[");
-
-        if (auto pos = list.begin(); pos != list.end())
-        {
-            out = std::format_to(out, "{}", *pos);
-            ++pos;
-
-            for (; pos != list.end(); ++pos)
-            {
-                out = std::format_to(out, ", {}", *pos);
-            }
+            erase(begin());
         }
 
-        return std::format_to(out, "]");
-    }
-};
+        friend bool operator==(const linked_list& lhs, const linked_list& rhs)
+        {
+            return std::ranges::equal(lhs, rhs);
+        }
+
+        friend auto operator<=>(const linked_list& lhs, const linked_list& rhs)
+        {
+            return std::lexicographical_compare_three_way(
+                lhs.begin(), lhs.end(),
+                rhs.begin(), rhs.end()
+            );
+        }
+
+    private:
+        node* head_{ nullptr };
+        std::size_t size_{ 0 };
+    };
+}

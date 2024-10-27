@@ -33,4 +33,7 @@ int main()
 
     std::print("Level-order traversal: ");
     std::println("{}", bt.level_order());
+
+    linked_list<int> list{ 1, 2, 3, 4, 5 };
+    std::print("linked list: {}", list);
 }
