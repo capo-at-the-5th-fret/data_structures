@@ -76,7 +76,9 @@ jobs:
           -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.config.ccache_variant }}
           -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }}
           -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+          -DDATA_STRUCTURES_BUILD_TESTS=ON
           -DDATA_STRUCTURES_BUILD_EXAMPLES=OFF
+          -DDATA_STRUCTURES_BUILD_BENCHMARKS=OFF
           -S ${{ github.workspace }}
 
       - name: Build
