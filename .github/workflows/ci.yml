@@ -73,9 +73,10 @@ jobs:
         if: matrix.config.ccache_variant
         run: >-
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
-          -D CMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.config.ccache_variant }}
+          -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.config.ccache_variant }}
           -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }}
           -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+          -DDATA_STRUCTURES_BUILD_EXAMPLES=OFF
           -S ${{ github.workspace }}
 
       - name: Build
