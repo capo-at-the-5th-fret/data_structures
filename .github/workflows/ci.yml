@@ -1,0 +1,93 @@
+name: Continuous Integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main", "fix/*" ]
+  #pull_request:
+    #branches: [ "main", "fix/*" ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    outputs:
+      BUILD_TYPE: ${{ env.BUILD_TYPE }}
+    steps:
+      - name: Compute Outputs
+        run: |
+          echo "BUILD_TYPE=${{ env.BUILD_TYPE }}" >> $GITHUB_OUTPUT
+      
+  build:
+    runs-on: ${{ matrix.config.os }}
+    needs: compute
+
+    strategy:
+      matrix:
+        config:
+          - { name: "windows (msvc)", os: windows-latest, cc: "cl", cxx: "cl", target_path: "./${{ needs.compute.outputs.BUILD_TYPE }}/benchmark_runner", ccache_variant: ccache }
+          #- { name: "windows (clang)", os: windows-latest, cc: "clang", cxx: "clang++", ccache_variant: sccache }
+          - { name: "ubuntu (gcc)", os: ubuntu-24.04, cc: "gcc", cxx: "g++-14", target_path: "./benchmark_runner", ccache_variant: ccache }
+          #- { name: "ubuntu (clang)", os: ubuntu-latest, cc: "clang", cxx: "clang++", ccache_variant: ccache }
+          - { name: "macos (clang)", os: macos-15-large, cc: "clang", cxx: "$(brew --prefix llvm@18)/bin/clang++", target_path: "./benchmark_runner", ccache_variant: ccache }
+          #- { name: "macos (gcc)", os: macos-latest, cc: "gcc", cxx: "g++", ccache_variant: ccache }
+
+    name: ${{ matrix.config.name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install CMake And Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "~3.30.0"
+
+      - name: Ccache
+        if: matrix.config.ccache_variant
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}-${{ matrix.config.os }}
+          variant: ${{ matrix.config.ccache_variant }}
+
+      - name: Set reusable strings
+        # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+      - name: Configure CMake
+        if: ${{ !matrix.config.ccache_variant }}
+        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+        run: >-
+          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }}
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+          -S ${{ github.workspace }}
+
+      - name: Configure CMake (Ccache)
+        if: matrix.config.ccache_variant
+        run: >-
+          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -D CMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.config.ccache_variant }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }}
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+          -S ${{ github.workspace }}
+
+      - name: Build
+        # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ env.BUILD_TYPE }}
+  
+      - name: Test
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
+        run: ctest -C ${{env.BUILD_TYPE}} --no-tests=error
+
+    #   - name: Benchmark
+    #     working-directory: ${{github.workspace}}/build
+    #     # Execute tests defined by the CMake configuration.
+    #     # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+    #     run: ${{ matrix.config.target_path }}
